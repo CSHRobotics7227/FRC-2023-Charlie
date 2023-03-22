@@ -31,6 +31,7 @@ class move2cart(commands2.SequentialCommandGroup):
             tiltArm(tiltSetpoint, tilter),
             extendArm(extendSetpoint, extender)
         )
+        #print('move 2 cartesian command created')
 
     def getInterruptionBehavior(self) -> Command.InterruptionBehavior:
         return commands2.Command.InterruptionBehavior.kCancelIncoming

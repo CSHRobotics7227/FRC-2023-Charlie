@@ -1,23 +1,43 @@
-import commands2
-
+import commands2.cmd
+import wpimath.controller
 import wpimath.trajectory
 
 from subsystems.DRIVE import DriveSubsystem
 
+import constants
 
-class goHeading(commands2.TrapezoidProfileCommand):
-    def __init__(self, feet: float, drive: DriveSubsystem) -> None:
+
+class goHeading(commands2.ProfiledPIDCommand):
+
+    def __init__(self, inches: float, drive: DriveSubsystem) -> None:
+        revolutions = (inches/18.85)*10.75
+        print('revolutions = ', revolutions)
         super().__init__(
-            wpimath.trajectory.TrapezoidProfile(
+            wpimath.controller.ProfiledPIDController(
+                constants.kDriveP,
+                constants.kDriveI,
+                constants.kDriveD,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    1, # max velocity
-                    2, # max acceleration
+                    90,
+                    180,
                 ),
-                # End at desired position in meters; implicitly starts at 0
-                wpimath.trajectory.TrapezoidProfile.State(feet, 0),
             ),
-            lambda setpointState: drive.arcadeDrive(setpointState.velocity, 0),
-            [drive], # require drive
+            # Close loop on heading
+            drive.getEncoders,
+            # Set reference to target
+            revolutions,
+            # Pipe output to turn robot
+            lambda output, setpoint: drive.arcadeDrive(output, 0),
+            # Require the drive
+            [drive],
         )
-        drive.setBrake()
-        drive.resetEncoders()
+        self.getController().setTolerance(1)
+
+    def execute(self) -> None:
+        super().execute()
+        print('at setpoint = ', self.getController().atSetpoint())
+        print('Distance Error = ', self.getController().getPositionError())
+
+    def isFinished(self) -> bool:
+        # End when the controller is at the reference.
+        return self.getController().atSetpoint()

@@ -25,7 +25,7 @@ class TurnToAngle(commands2.ProfiledPIDCommand):
             # Set reference to target
             targetAngleDegrees,
             # Pipe output to turn robot
-            lambda output: drive.arcadeDrive(0, output),
+            lambda output, setpoint: drive.arcadeDrive(0, output),
             # Require the drive
             [drive],
         )
@@ -33,6 +33,7 @@ class TurnToAngle(commands2.ProfiledPIDCommand):
         # Set the controller tolerance - the delta tolerance ensures the robot is stationary at the
         # setpoint before it is considered as having reached the reference
         self.getController().setTolerance(1)
+        print('target = ', targetAngleDegrees)
 
     def execute(self) -> None:
         super().execute()

@@ -16,11 +16,13 @@ class extendArm(commands2.CommandBase):
         super().__init__()
         self.target = target
         self.extender = extener
+        #print('extend arm command created')
 
     def getInterruptionBehavior(self) -> Command.InterruptionBehavior:
         return commands2.Command.InterruptionBehavior.kCancelIncoming
 
     def initialize(self) -> None:
+        super().initialize()
         self.extender.setGoal(self.target)
         #print('EXTENDING ARM')
 

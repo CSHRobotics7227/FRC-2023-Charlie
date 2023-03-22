@@ -18,6 +18,12 @@ class claw(commands2.SubsystemBase):
     def release(self):
         self.clawCyl.set(wpilib.DoubleSolenoid.Value.kReverse)
 
+    def toggleTilt(self):
+        if self.tiltCyl.get() == wpilib.DoubleSolenoid.Value.kReverse:
+            self.tiltCyl.set(wpilib.DoubleSolenoid.Value.kForward)
+        else:
+            self.tiltCyl.set(wpilib.DoubleSolenoid.Value.kReverse)
+
     def toggleGrab(self):
         if self.clawCyl.get() == wpilib.DoubleSolenoid.Value.kReverse:
             self.clawCyl.set(wpilib.DoubleSolenoid.Value.kForward)

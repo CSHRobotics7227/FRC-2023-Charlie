@@ -20,22 +20,7 @@ class Robot(commands2.TimedCommandRobot):
         commands2.ScheduleCommand(extendArm(0, self.container.extender).andThen(tiltArm(8.52, self.container.tilter)))
 
     def teleopPeriodic(self) -> None:
-        #self.setpoint += 0.02 * 0.02 * self.container.driverController.getRawAxis(1)
-        #self.container.tilter.setGoal(self.setpoint)
-        #print('setpoint = ', self.setpoint)
-        #maxA = (self.container.driverController.getRawAxis(3)+1)/2
-        #maxV = (self.container.driverController.getRawAxis(3)+1)/2
-        #print('max A = ', maxA)
-        #print('max V = ', maxV)
-        #self.container.tilter.getController().setConstraints(trajectory.TrapezoidProfile.Constraints(
-        #        0.75*4*maxV,
-        #        0.9*4*maxA,
-        #    ))
-        #self.setpoint += 0.02*8*self.container.driverController2.getRawAxis(1)
-        ##commands2.ScheduleCommand(move2cart(self.setpoint, -30, self.container.tilter, self.container.extender))
-        #self.container.tilter.cart2polar(self.setpoint, -28)
-        #self.container.extender.cart2polar(self.setpoint, -28)
-        pass
+        self.container.teleopPeriodic()
 
     def testInit(self) -> None:
         pass
@@ -45,6 +30,7 @@ class Robot(commands2.TimedCommandRobot):
 
     def disabledInit(self):
         self.container.disableAllPID()
+        self.container.setDefaultPos()
 
 
 if __name__ == "__main__":

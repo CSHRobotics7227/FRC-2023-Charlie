@@ -19,11 +19,11 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
                     2.1,
                     3.0,
                 ),
-            )
+            ),
+            8.52
         )
         self.tiltMotor = rev.CANSparkMax(7, rev.CANSparkMax.MotorType.kBrushless)
         self.encoder = wpilib.DutyCycleEncoder(1)
-        self.setGoal(7.5)
         self.disable()
         self.tiltMotor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
 
@@ -56,3 +56,10 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
         #if (-math.pi/3) < theta < (math.pi/6): return
         tiltSetpoint = ((theta / (-math.pi * 2)) + 0.743) * 10
         self.setGoal(tiltSetpoint)
+
+    def adjustTilt(self, add: float):
+        current = self.getController().getGoal().position
+        setpoint = current+add
+        if setpoint>=9 or setpoint<=6.45: return
+        #print('adjusting tilt to  = ', setpoint)
+        self.setGoal(setpoint)

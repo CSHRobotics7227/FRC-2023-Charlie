@@ -20,6 +20,7 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
                     200,
                 ),
             ),
+            0
         )
         self.extendMotor = rev.CANSparkMax(6, rev.CANSparkMax.MotorType.kBrushless)
         self.extendMotor.setSmartCurrentLimit(30)
@@ -28,9 +29,7 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
         self.encoder = self.extendMotor.getEncoder()
 
         self.limitSwitch = wpilib.DigitalInput(0)
-        self.setGoal(0)
         self.disable()
-        self.getController().setTolerance(0.3)
 
     def _useOutput(self, output: float, setpoint: float) -> None:
         #if math.fabs(output)>1: output=output/math.fabs(output)
@@ -55,3 +54,10 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
         #if 42 < r < 72: return
         extendSetpoint = (r - 42) * -2.4667
         self.setGoal(extendSetpoint)
+
+    def adjustExtender(self, add: float):
+        current = self.getController().getGoal().position
+        setpoint = current+add
+        if -setpoint<0 or -setpoint>=76: return
+        #print('adjusting extender to = ', setpoint)
+        self.setGoal(setpoint)

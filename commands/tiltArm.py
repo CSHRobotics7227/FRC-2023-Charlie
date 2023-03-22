@@ -11,11 +11,14 @@ class tiltArm(commands2.CommandBase):
         super().__init__()
         self.target = target
         self.tilter = tilter
+        #print('tilt arm command created')
 
     def getInterruptionBehavior(self) -> Command.InterruptionBehavior:
         return commands2.Command.InterruptionBehavior.kCancelIncoming
 
+
     def initialize(self) -> None:
+        super().initialize()
         self.tilter.setGoal(self.target)
         #print('TILTING ARM')
 

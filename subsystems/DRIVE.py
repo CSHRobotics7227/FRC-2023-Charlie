@@ -72,11 +72,10 @@ class DriveSubsystem(commands2.SubsystemBase):
         self.gyro.reset()
 
     def getHeading(self):
-        print('heading  = ', self.gyro.getAngle())
         return self.gyro.getAngle()
 
     def getEncoders(self):
-        return self.LDrive1.getSelectedSensorPosition(), self.RDrive2.getSelectedSensorPosition()
+        return (self.LDrive1.getSelectedSensorPosition()/2048 + self.RDrive2.getSelectedSensorPosition()/2048)/2
 
     def getTurnRate(self):
         return self.gyro.getRate() * -1

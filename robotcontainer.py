@@ -13,8 +13,8 @@ from subsystems.LOCKDOWN import lockdown
 
 from commands.move2cart import move2cart
 
-from commands.gotoangle import TurnToAngle
 from commands.goheading import goHeading
+from commands.gotoangle import TurnToAngle
 from commands.tiltArm import tiltArm
 from commands.extendArm import extendArm
 
@@ -26,10 +26,10 @@ class RobotContainer:
         self.imu.calibrate()
         self.imu.setYawAxis(wpilib.ADIS16470_IMU.IMUAxis.kY)
 
-        self.robotDrive = DriveSubsystem(self.imu)
+        self.joy0 = CommandJoystick(0)
+        self.joy1 = CommandJoystick(1)
 
-        self.driverController = CommandJoystick(0)
-        self.driverController2 = CommandJoystick(1)
+        self.robotDrive = DriveSubsystem(self.imu)
 
         self.tilter = tiltSubsystem()
         self.extender = extenderSubsystem()
@@ -41,69 +41,70 @@ class RobotContainer:
 
         self.robotDrive.setDefaultCommand(
             commands2.RunCommand(
-                lambda:  self.robotDrive.arcadeDrive(self.driverController.getRawAxis(1), self.driverController.getRawAxis(2), self.driverController.getRawButton(2), self.driverController.getRawButton(8), -(self.driverController.getRawAxis(3)+1)/2),
+                lambda:
+                self.robotDrive.arcadeDrive(self.joy0.getRawAxis(1), self.joy0.getRawAxis(2), self.joy0.getRawButton(2), self.joy0.getRawButton(8), -(self.joy0.getRawAxis(3)+1)/2),
                 [self.robotDrive],
             )
         )
 
 
     def configureButtonBindings(self):
-        #self.driverController.button(1).onTrue(
-        #    commands2.ScheduleCommand(commands.gotoangle.TurnToAngle(45, self.robotDrive))
-        #)
-        self.driverController.button(1).onTrue(
+        self.joy0.button(1).onTrue(
             commands2.cmd.runOnce(lambda:
-                                  self.claw.toggleGrab(), [self.claw])
+                self.claw.toggleGrab(), [self.claw])
         )
-        self.driverController.button(3).onTrue(
+        self.joy0.button(3).onTrue(
             commands2.cmd.runOnce(lambda:
-                                  self.claw.tiltUp(), [self.claw])
+                self.claw.toggleTilt(), [self.claw])
         )
-        self.driverController.button(4).onTrue(
+        self.joy0.button(5).onTrue(
+            goHeading(40, self.robotDrive)
+        )
+        self.joy0.button(6).onTrue(
+            TurnToAngle(45, self.robotDrive)
+        )
+        self.joy0.button(10).onTrue(
             commands2.cmd.runOnce(lambda:
-                                  self.claw.tiltDown(), [self.claw])
-        )
-        self.driverController.button(5).onTrue(
+                self.robotDrive.setBrake(), [self.robotDrive])
+        ).onFalse(
             commands2.cmd.runOnce(lambda:
-                                  self.claw.release(), [self.claw])
+                self.robotDrive.setCoast(), [self.robotDrive])
         )
-        self.driverController.button(6).onTrue(
+        self.joy0.button(11).onTrue(
             commands2.cmd.runOnce(lambda:
-                                  self.claw.grip(), [self.claw])
+                self.lockdown.toggleLock(), [self.lockdown])
         )
-        self.driverController.button(10).onTrue(
-            commands2.cmd.runOnce(lambda:
-                                  self.robotDrive.setBrake(), [self.robotDrive])
-        )
-        self.driverController.button(10).onFalse(
-            commands2.cmd.runOnce(lambda:
-                                  self.robotDrive.setCoast(), [self.robotDrive])
-        )
-        self.driverController.button(11).onTrue(
-            commands2.cmd.runOnce(lambda:
-                                  self.lockdown.toggleLock(), [self.lockdown])
-        )
-        self.driverController2.button(7).onTrue(
-            commands2.ScheduleCommand(move2cart(51+3, 3, self.tilter, self.extender))
-        )
-        self.driverController2.button(8).onTrue(
-            commands2.ScheduleCommand(move2cart(66.5+5, 17+2, self.tilter, self.extender))
-        )
-        self.driverController2.button(9).onTrue(
-            commands2.ScheduleCommand(move2cart(51+3, -5, self.tilter, self.extender))
-        )
-        self.driverController2.button(10).onTrue(
-            commands2.ScheduleCommand(move2cart(66.5+5, 9, self.tilter, self.extender))
-        )
-        self.driverController2.button(11).onTrue(
-            commands2.ScheduleCommand(move2cart(43, 2, self.tilter, self.extender))
-        )
-        self.driverController2.button(12).onTrue(
-            commands2.ScheduleCommand(extendArm(0, self.extender).andThen(tiltArm(8.8, self.tilter)))
-        )
-        self.driverController2.button(1).onTrue(
-            commands2.ScheduleCommand(extendArm(0, self.extender).andThen(tiltArm(8.52, self.tilter)))
-        )
+        #############
+        ### JOY 1 ###
+        #############
+        self.joy1.button(7).onTrue(
+            move2cart(54, 3, self.tilter, self.extender)
+        ) # Mid Cone
+        self.joy1.button(8).onTrue(
+            move2cart(71.5, 19, self.tilter, self.extender)
+        ) # High Cone
+        self.joy1.button(9).onTrue(
+            move2cart(54, -5, self.tilter, self.extender)
+        ) # Mid Cube
+        self.joy1.button(10).onTrue(
+            move2cart(71.5, 9, self.tilter, self.extender)
+        ) # High Cube
+        self.joy1.button(11).onTrue(
+            move2cart(43, 2, self.tilter, self.extender)
+        ) # Loading Station
+        self.joy1.button(12).onTrue(
+            extendArm(0, self.extender).andThen(tiltArm(8.8, self.tilter))
+        ) # Ground Pickup
+        self.joy1.button(1).onTrue(
+            extendArm(0, self.extender).andThen(tiltArm(8.52, self.tilter))
+        ) # Safety
+
+    def teleopPeriodic(self):
+        if self.joy1.button(2):
+            tiltAdd = self.joy1.getRawAxis(1)*0.02*0.05 # +/- 1 (joystick) * 1/50 (for total movement per sec) * (total encoder change per second)
+            self.tilter.adjustTilt(tiltAdd)
+            extendAdd = self.joy1.getRawAxis(0)*0.02*3 # +/- 1 (joystick) * 1/50 (for total movement per sec) * (total encoder change per second)
+            self.extender.adjustExtender(extendAdd)
 
 
 
@@ -113,4 +114,8 @@ class RobotContainer:
     def enableAllPID(self):
         self.tilter.enable()
         self.extender.enable()
+
+    def setDefaultPos(self):
+        self.tilter.setGoal(8.52)
+        self.extender.setGoal(0)
 
