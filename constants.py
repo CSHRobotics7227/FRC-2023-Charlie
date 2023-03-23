@@ -1,5 +1,5 @@
 # PID CONSTANTS
-kTurnP = 0.1
+kTurnP = 0.065
 kTurnI = 0
 kTurnD = 0
 
@@ -11,7 +11,7 @@ kExtendP = 0.1
 kExtendI = 0
 kExtendD = 0
 
-kDriveP = 0.025
+kDriveP = 0.2
 kDriveI = 0
 kDriveD = 0
 

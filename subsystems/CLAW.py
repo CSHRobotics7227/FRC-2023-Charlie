@@ -7,11 +7,12 @@ class claw(commands2.SubsystemBase):
         super().__init__()
         self.tiltCyl = wpilib.DoubleSolenoid(8, wpilib.PneumaticsModuleType.REVPH, 2, 3)
         self.clawCyl = wpilib.DoubleSolenoid(8, wpilib.PneumaticsModuleType.REVPH, 5, 4)
+        self.grip()
 
     def tiltDown(self):
-        self.tiltCyl.set(wpilib.DoubleSolenoid.Value.kForward)
-    def tiltUp(self):
         self.tiltCyl.set(wpilib.DoubleSolenoid.Value.kReverse)
+    def tiltUp(self):
+        self.tiltCyl.set(wpilib.DoubleSolenoid.Value.kForward)
 
     def grip(self):
         self.clawCyl.set(wpilib.DoubleSolenoid.Value.kForward)

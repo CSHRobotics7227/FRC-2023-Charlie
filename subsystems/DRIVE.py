@@ -96,13 +96,13 @@ class DriveSubsystem(commands2.SubsystemBase):
         if math.fabs(power) < 0.0703125: power = 0 # 0.0703125 is the deadbend
         if math.fabs(turn) < 0.0703125: turn = 0
 
-        motor_power = .5  # (self.joystick2.getRawAxis(3)+1) / 2
-        #print('setting motors = ', turn, power)
+        motor_power = .5
         if halfspeed: motor_power*=0.5
         if doublespeed:
             motor_power*=2
             turn_power*=0.5
-
+        #print('heading = ', self.getHeading())
+        #print('encoders = ', self.getEncoders())
         self.LDrive1.set(ctre.ControlMode.PercentOutput, ((power + (turn * turn_power)) * motor_power))
         self.RDrive2.set(ctre.ControlMode.PercentOutput, ((power - (turn * turn_power)) * motor_power))
 

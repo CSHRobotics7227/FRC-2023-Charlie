@@ -1,3 +1,5 @@
+import math
+
 import commands2.cmd
 import wpimath.controller
 import wpimath.trajectory
@@ -8,9 +10,8 @@ import constants
 
 
 class goHeading(commands2.ProfiledPIDCommand):
-
     def __init__(self, inches: float, drive: DriveSubsystem) -> None:
-        revolutions = (inches/18.85)*10.75
+        revolutions = -(inches/18.85)*8.85
         print('revolutions = ', revolutions)
         super().__init__(
             wpimath.controller.ProfiledPIDController(
@@ -18,8 +19,8 @@ class goHeading(commands2.ProfiledPIDCommand):
                 constants.kDriveI,
                 constants.kDriveD,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    90,
-                    180,
+                    20,
+                    40,
                 ),
             ),
             # Close loop on heading
@@ -31,13 +32,16 @@ class goHeading(commands2.ProfiledPIDCommand):
             # Require the drive
             [drive],
         )
-        self.getController().setTolerance(1)
+        #self.getController().setTolerance()
+        drive.resetEncoders()
+        drive.setBrake()
+        self.drive = drive
+
 
     def execute(self) -> None:
         super().execute()
-        print('at setpoint = ', self.getController().atSetpoint())
-        print('Distance Error = ', self.getController().getPositionError())
+        print('goal = ', math.fabs(self.getController().getGoal().position))
+        print('encoders = ', math.fabs(self.drive.getEncoders()))
 
     def isFinished(self) -> bool:
-        # End when the controller is at the reference.
-        return self.getController().atSetpoint()
+        return math.fabs(self.getController().getGoal().position)-math.fabs(self.drive.getEncoders()) <= 0.3

@@ -32,7 +32,6 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
         self.tiltMotor.set(-output+.07)
 
     def _getMeasurement(self) -> float:
-        #print('tilter pos = ', self.encoder.getAbsolutePosition())
         position = self.encoder.getAbsolutePosition() * 10
         return position
 
@@ -47,15 +46,15 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
         #print('tilt pos = ', self.encoder.getAbsolutePosition()*10)
         #print('tilt setpoint = ', self.getController().getSetpoint().position)
         #print('at setpoint = ', self.getController().atSetpoint())
-        ##print('tilt error = ', self.getController().getPositionError())
-        ##print('tilt tolerence = ', self.getController().getPositionTolerance())
+        #print('tilt error = ', self.getController().getPositionError())
+        #print('tilt tolerence = ', self.getController().getPositionTolerance())
         #print('is enabled = ', self.isEnabled())
 
     def cart2polar(self, x: float, y: float) -> None:
         theta = math.atan(y / x)
-        #if (-math.pi/3) < theta < (math.pi/6): return
-        tiltSetpoint = ((theta / (-math.pi * 2)) + 0.743) * 10
-        self.setGoal(tiltSetpoint)
+        setpoint = ((theta / (-math.pi * 2)) + 0.743) * 10
+        if setpoint>=9 or setpoint<=6.45: return
+        self.setGoal(setpoint)
 
     def adjustTilt(self, add: float):
         current = self.getController().getGoal().position

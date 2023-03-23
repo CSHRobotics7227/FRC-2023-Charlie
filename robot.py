@@ -12,12 +12,15 @@ class Robot(commands2.TimedCommandRobot):
         self.container = robotcontainer.RobotContainer()
         #self.setpoint = 42
 
-    #def autonomousPeriodic(self):
-    #    self.container.robotDrive.goToDistance(50000)
+    def autonomousInit(self):
+        self.container.enableAllPID()
+        self.container.robotDrive.setBrake()
+        self.container.autoCommand().schedule()
 
     def teleopInit(self):
         self.container.enableAllPID()
-        commands2.ScheduleCommand(extendArm(0, self.container.extender).andThen(tiltArm(8.52, self.container.tilter)))
+        self.container.robotDrive.setCoast()
+        extendArm(0, self.container.extender).andThen(tiltArm(8.52, self.container.tilter)).schedule()
 
     def teleopPeriodic(self) -> None:
         self.container.teleopPeriodic()

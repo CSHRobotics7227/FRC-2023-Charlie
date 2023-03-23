@@ -58,6 +58,6 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
     def adjustExtender(self, add: float):
         current = self.getController().getGoal().position
         setpoint = current+add
-        if -setpoint<0 or -setpoint>=76: return
+        if -setpoint<0 or -setpoint>=80: return
         #print('adjusting extender to = ', setpoint)
         self.setGoal(setpoint)

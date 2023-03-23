@@ -2,7 +2,6 @@ import math
 
 import commands2.cmd
 from commands2 import Command
-from commands2 import InstantCommand
 
 from subsystems.EXTENDER import extenderSubsystem
 from subsystems.TILT import tiltSubsystem
