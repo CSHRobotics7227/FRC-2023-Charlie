@@ -1,13 +1,10 @@
 import math
-import typing
 
 import commands2.cmd
-from commands2 import ProfiledPIDSubsystem
-import wpimath.controller
+from commands2 import Command
+
 
 from subsystems.EXTENDER import extenderSubsystem
-from commands2 import Command
-import const
 
 
 class extendArm(commands2.CommandBase):
@@ -16,7 +13,6 @@ class extendArm(commands2.CommandBase):
         super().__init__()
         self.target = target
         self.extender = extener
-
 
     def getInterruptionBehavior(self) -> Command.InterruptionBehavior:
         return commands2.Command.InterruptionBehavior.kCancelIncoming

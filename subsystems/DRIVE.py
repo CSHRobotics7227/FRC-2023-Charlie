@@ -19,41 +19,20 @@ class DriveSubsystem(commands2.SubsystemBase):
         self.RDrive4.configFactoryDefault(30)
 
         ### SET MAXIMIUM SPEED ###
-        self.RDrive2.configPeakOutputForward(constants.maxSpeed, 30)  # set speed to 35% and wait 30 ms
-        self.RDrive2.configPeakOutputReverse(-constants.maxSpeed, 30)
-        self.RDrive4.configPeakOutputForward(constants.maxSpeed, 30)
-        self.RDrive4.configPeakOutputReverse(-constants.maxSpeed, 30)
-        self.LDrive1.configPeakOutputForward(constants.maxSpeed, 30)
-        self.LDrive1.configPeakOutputReverse(-constants.maxSpeed, 30)
-        self.LDrive3.configPeakOutputForward(constants.maxSpeed, 30)
-        self.LDrive3.configPeakOutputReverse(-constants.maxSpeed, 30)
+        self.RDrive2.configPeakOutputForward(const.maxSpeed, 30)
+        self.RDrive2.configPeakOutputReverse(-const.maxSpeed, 30)
+        self.RDrive4.configPeakOutputForward(const.maxSpeed, 30)
+        self.RDrive4.configPeakOutputReverse(-const.maxSpeed, 30)
+        self.LDrive1.configPeakOutputForward(const.maxSpeed, 30)
+        self.LDrive1.configPeakOutputReverse(-const.maxSpeed, 30)
+        self.LDrive3.configPeakOutputForward(const.maxSpeed, 30)
+        self.LDrive3.configPeakOutputReverse(-const.maxSpeed, 30)
 
         # zero encoders
         self.LDrive3.setSelectedSensorPosition(0)
         self.LDrive1.setSelectedSensorPosition(0)
         self.RDrive4.setSelectedSensorPosition(0)
         self.RDrive2.setSelectedSensorPosition(0)
-
-        self.LDrive3.config_kP(0, 0.4)
-        self.LDrive1.config_kP(0, 0.4)
-        self.RDrive4.config_kP(0, 0.4)
-        self.RDrive2.config_kP(0, 0.4)
-
-        self.LDrive3.config_kF(0, 0.2)
-        self.LDrive1.config_kF(0, 0.2)
-        self.RDrive4.config_kF(0, 0.2)
-        self.RDrive2.config_kF(0, 0.2)
-
-        self.LDrive3.configMotionAcceleration(6000)
-        self.LDrive1.configMotionAcceleration(6000)
-        self.RDrive4.configMotionAcceleration(6000)
-        self.RDrive2.configMotionAcceleration(6000)
-
-        self.LDrive3.configMotionCruiseVelocity(15000)
-        self.LDrive1.configMotionCruiseVelocity(15000)
-        self.RDrive4.configMotionCruiseVelocity(15000)
-        self.RDrive2.configMotionCruiseVelocity(15000)
-
 
         # ensure the 2 drive motors are going in the correct direction
         self.LDrive1.setInverted(True) # motors should be inverted in gearbox
@@ -64,51 +43,14 @@ class DriveSubsystem(commands2.SubsystemBase):
         self.gyro = gyro
 
         self.gyro.reset() # set angle = 0
-        self.resetEncoders()
-
-    def resetEncoders(self):
-        self.LDrive1.setSelectedSensorPosition(0)
-        self.RDrive2.setSelectedSensorPosition(0)
-
-    def zeroHeading(self):
-        self.gyro.reset()
-
-    def getHeading(self):
-        return self.gyro.getAngle()
-
-    def tanHeading(self):
-        return math.tan(self.gyro.getAngle())
-
-
-    def getXaxis(self):
-        return self.gyro.getXFilteredAccelAngle()-85
-
-    def getYaxis(self):
-        return self.gyro.getYFilteredAccelAngle()
-
-    def getEncoders(self):
-        return (self.LDrive1.getSelectedSensorPosition()/2048 + self.RDrive2.getSelectedSensorPosition()/2048)/2
-
-    def getTurnRate(self):
-        return self.gyro.getRate() * -1
-
-    def setBrake(self):
-        self.LDrive1.setNeutralMode(ctre.NeutralMode.Brake)
-        self.LDrive3.setNeutralMode(ctre.NeutralMode.Brake)
-        self.RDrive2.setNeutralMode(ctre.NeutralMode.Brake)
-        self.RDrive4.setNeutralMode(ctre.NeutralMode.Brake)
-
-    def setCoast(self):
-        self.LDrive1.setNeutralMode(ctre.NeutralMode.Coast)
-        self.LDrive3.setNeutralMode(ctre.NeutralMode.Coast)
-        self.RDrive2.setNeutralMode(ctre.NeutralMode.Coast)
-        self.RDrive4.setNeutralMode(ctre.NeutralMode.Coast)
 
     def arcadeDrive(self, power: float, turn: float, halfspeed=False, doublespeed=False, turn_power=0.3, reverse=False):
-        if math.fabs(power) < 0.0703125: power = 0 # 0.0703125 is the deadbend
-        if math.fabs(turn) < 0.0703125: turn = 0
+        if math.fabs(power) < const.powerDeadband: power = 0 # 0.0703125 is the deadbend
+        if math.fabs(turn) < const.turnDeadband: turn = 0
 
-        #print('power = ', power)
+        #power-=const.powerDeadband
+        #turn-=const.turnDeadband
+
         motor_power = .5
         if halfspeed: motor_power*=0.5
         if doublespeed:
@@ -120,12 +62,29 @@ class DriveSubsystem(commands2.SubsystemBase):
             polarity=-1
             turn_power*=-1
 
-        self.LDrive1.set(ctre.ControlMode.PercentOutput, polarity*((power + (turn * turn_power)) * motor_power))
-        self.RDrive2.set(ctre.ControlMode.PercentOutput, polarity*((power - (turn * turn_power)) * motor_power))
+        self.LDrive1.set(ctre.ControlMode.PercentOutput,
+                         polarity*((power + (turn * turn_power)) * motor_power))
+        self.RDrive2.set(ctre.ControlMode.PercentOutput,
+                         polarity*((power - (turn * turn_power)) * motor_power))
 
-    def goToDistance(self, distance: float):
-        self.LDrive1.set(ctre.ControlMode.MotionMagic, distance)
-        self.RDrive2.set(ctre.ControlMode.MotionMagic, distance)
-
-    #def periodic(self) -> None:
-    #    print('GYRO = ', self.gyro.getAngle())
+    def resetEncoders(self):
+        self.LDrive1.setSelectedSensorPosition(0)
+        self.RDrive2.setSelectedSensorPosition(0)
+    def zeroHeading(self):
+        self.gyro.reset()
+    def getHeading(self):
+        return self.gyro.getAngle()
+    def tanHeading(self):
+        return math.tan(self.gyro.getAngle())
+    def getAvgDistance(self):
+        return (self.LDrive1.getSelectedSensorPosition()/2048 + self.RDrive2.getSelectedSensorPosition()/2048)/2
+    def setBrake(self):
+        self.LDrive1.setNeutralMode(ctre.NeutralMode.Brake)
+        self.LDrive3.setNeutralMode(ctre.NeutralMode.Brake)
+        self.RDrive2.setNeutralMode(ctre.NeutralMode.Brake)
+        self.RDrive4.setNeutralMode(ctre.NeutralMode.Brake)
+    def setCoast(self):
+        self.LDrive1.setNeutralMode(ctre.NeutralMode.Coast)
+        self.LDrive3.setNeutralMode(ctre.NeutralMode.Coast)
+        self.RDrive2.setNeutralMode(ctre.NeutralMode.Coast)
+        self.RDrive4.setNeutralMode(ctre.NeutralMode.Coast)

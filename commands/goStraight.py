@@ -14,39 +14,22 @@ class goStriaght(commands2.ProfiledPIDCommand):
         revolutions = -(inches/18.85)*8.85
         super().__init__(
             wpimath.controller.ProfiledPIDController(
-                constants.kDriveP,
-                constants.kDriveI,
-                constants.kDriveD,
+                const.kDriveForwardP,
+                const.kDriveForwardI,
+                const.kDriveForwardD,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    15,
-                    30,
+                    const.kDriveForwardV,
+                    const.kDriveForwardA,
                 ),
             ),
-            drive.getEncoders,
+            drive.getAvgDistance,
             revolutions,
             lambda output, setpoint: None, #drive.arcadeDrive(output, 0),
             [drive],
         )
-        #drive.resetEncoders()
         drive.setBrake()
         self.drive = drive
-        #self.controller = wpimath.controller.PIDController(.24,0,0)
 
-    #def initialize(self) -> None:
-    #    super().initialize()
-    #    self.drive.resetEncoders()
-    #    print('encoders = ', self.drive.getEncoders())
-
-
-    def execute(self) -> None:
-        super().execute()
-        print('going forward')
-        #self.getController().calculate()
-
-
-    #def end(self, interrupted: bool) -> None:
-    #    super().end(interrupted)
-    #    print('encoders at end = ', self.drive.getEncoders())
 
     def isFinished(self) -> bool:
-        return math.fabs(self.getController().getGoal().position)-math.fabs(self.drive.getEncoders()) <= 0.3
+        return math.fabs(self.getController().getGoal().position)-math.fabs(self.drive.getAvgDistance()) <= 0.3

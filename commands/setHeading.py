@@ -2,6 +2,7 @@ import math
 
 import commands2.cmd
 
+import const
 from subsystems.DRIVE import DriveSubsystem
 
 class setHeading(commands2.CommandBase):
@@ -10,8 +11,6 @@ class setHeading(commands2.CommandBase):
         super().__init__()
         self.revolutions = -(inches / 18.85) * 8.85
         self.drive = drive
-        self.forward = 0.4
-        self.k = -0.0714173
 
         self.addRequirements(drive)
 
@@ -23,14 +22,12 @@ class setHeading(commands2.CommandBase):
 
     def execute(self) -> None:
         super().execute()
-        direction = (self.revolutions-self.drive.getEncoders())/math.fabs((self.revolutions-self.drive.getEncoders()))
+        direction = (self.revolutions - self.drive.getAvgDistance()) / math.fabs((self.revolutions - self.drive.getAvgDistance()))
         gyroError = self.drive.getHeading()
-        self.drive.arcadeDrive(self.forward*direction, gyroError*self.k)
-        print('gyro Error = ', gyroError)
-        print('direction = ', direction)
+        self.drive.arcadeDrive(const.headingSpeed*direction, gyroError*const.headingK)
 
     def end(self, interrupted: bool) -> None:
         super().end(interrupted)
         self.drive.arcadeDrive(0,0)
     def isFinished(self) -> bool:
-        return math.fabs(self.drive.getEncoders()-self.revolutions) < 0.4
+        return math.fabs(self.drive.getAvgDistance() - self.revolutions) < 0.4

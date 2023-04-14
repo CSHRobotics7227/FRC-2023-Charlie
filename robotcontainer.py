@@ -1,4 +1,3 @@
-import math
 import time
 
 import wpilib
@@ -14,13 +13,11 @@ from subsystems.LOCKDOWN import lockdown
 from subsystems.VISION import visionSubsystem
 
 from commands.move2cart import move2cart
-from commands.goStraight import goStriaght
-from commands.gotoangle import TurnToAngle
+from commands.setAngle import setAngle
 from commands.tiltArm import tiltArm
 from commands.extendArm import extendArm
 from commands.route1 import route1
 from commands.setHeading import setHeading
-from commands.PIDbalance import gyroBalance
 
 
 class RobotContainer:
@@ -29,12 +26,11 @@ class RobotContainer:
         self.imu = wpilib.ADIS16470_IMU()
         self.imu.calibrate()
         self.imu.setYawAxis(wpilib.ADIS16470_IMU.IMUAxis.kY)
-        #self.imu.setYawAxis(wpilib.ADIS16470_IMU.IMUAxis.kX)
 
         self.joy0 = CommandJoystick(0)
         self.joy1 = CommandJoystick(1)
 
-        self.robotDrive = DriveSubsystem(self.imu)
+        self.drive = DriveSubsystem(self.imu)
 
         self.tilter = tiltSubsystem()
         self.extender = extenderSubsystem()
@@ -51,19 +47,19 @@ class RobotContainer:
         self.safety = extendArm(0, self.extender).andThen(tiltArm(8.83, self.tilter))
         self.safety.addRequirements(self.tilter, self.extender)
 
-        self.autoCommand = route1(self.tilter, self.extender, self.robotDrive, self.lockdown, self.claw)
-
-        self.configureButtonBindings()
+        self.autoCommand = route1(self.tilter, self.extender, self.drive, self.lockdown, self.claw)
 
         self.lastTargetPress = time.time()
 
-        self.robotDrive.setDefaultCommand(
+        self.configureButtonBindings()
+
+        self.drive.setDefaultCommand(
             commands2.RunCommand(
                 lambda:
-                self.robotDrive.arcadeDrive(
+                self.drive.arcadeDrive(
                     self.joy0.getRawAxis(1), self.joy0.getRawAxis(2), self.joy0.getRawButton(2),
                             self.joy0.getRawButton(8), -(-self.joy0.getRawAxis(3) + 1) / 2, self.joy0.getRawButton(7)),
-                [self.robotDrive],
+                [self.drive],
             )
         )
 
@@ -84,10 +80,10 @@ class RobotContainer:
         ) # toggle light
         self.joy0.button(10).onTrue(
             commands2.cmd.runOnce(lambda:
-                self.robotDrive.setBrake(), [self.robotDrive])
+                self.drive.setBrake(), [self.drive])
         ).onFalse(
             commands2.cmd.runOnce(lambda:
-                self.robotDrive.setCoast(), [self.robotDrive])
+                self.drive.setCoast(), [self.drive])
         ) # brake hold down
         self.joy0.button(11).onTrue(
             commands2.cmd.runOnce(lambda:
@@ -126,7 +122,7 @@ class RobotContainer:
     def autoInit(self):
         self.imu.setYawAxis(wpilib.ADIS16470_IMU.IMUAxis.kX)
         self.enableAllPID()
-        self.robotDrive.setBrake()
+        self.drive.setBrake()
         self.autoCommand.schedule()
 
     def teleopInit(self):
@@ -134,7 +130,7 @@ class RobotContainer:
         commands2.CommandScheduler.getInstance().cancelAll()
         self.enableAllPID()
         self.lockdown.lockUp()
-        self.robotDrive.setCoast()
+        self.drive.setCoast()
         self.setDefaultPos()
         self.lights.set(True)
 
@@ -151,10 +147,10 @@ class RobotContainer:
             if currentTime-self.lastTargetPress >= 0.33:
                 if self.joy0.button(6):
                     distance2Target = self.vision.getAprilTargets().getBestCameraToTarget().x_feet * 12
-                    TurnToAngle(-self.vision.getAprilTargets().getYaw(), self.robotDrive).andThen(setHeading(distance2Target - 39, self.robotDrive)).schedule()
+                    setAngle(-self.vision.getAprilTargets().getYaw(), self.drive).andThen(setHeading(distance2Target - 39, self.drive)).schedule()
                     self.lastTargetPress = time.time()
                 if self.joy0.button(5):
-                    TurnToAngle(-self.vision.getRetroTargets().getYaw(), self.robotDrive).schedule()
+                    setAngle(-self.vision.getRetroTargets().getYaw(), self.drive).schedule()
                     self.lastTargetPress = time.time()
 
         if self.joy0.button(3) or self.joy1.button(3):

@@ -9,7 +9,6 @@ class Robot(TimedCommandRobot):
         self.rob = robotcontainer.RobotContainer()
         self.rob.lights.set(False)
 
-
     def autonomousInit(self):
         self.rob.autoInit()
 
@@ -20,7 +19,6 @@ class Robot(TimedCommandRobot):
 
     def testInit(self) -> None:
         pass
-
     def testPeriodic(self):
         pass
 
@@ -30,5 +28,4 @@ class Robot(TimedCommandRobot):
         self.rob.lights.set(False)
 
 
-if __name__ == "__main__":
-    run(Robot)
+if __name__ == "__main__": run(Robot)

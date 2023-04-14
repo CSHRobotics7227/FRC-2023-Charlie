@@ -1,5 +1,3 @@
-import math
-
 import commands2.cmd
 from commands2 import InstantCommand
 
@@ -11,7 +9,6 @@ from subsystems.EXTENDER import extenderSubsystem
 from commands.tiltArm import tiltArm
 from commands.extendArm import extendArm
 from commands.setHeading import setHeading
-from commands.PIDbalance import gyroBalance
 from commands.bangBangBalance import gyroBalance2
 from commands.move2cart import move2cart
 
@@ -31,12 +28,11 @@ class route1(commands2.SequentialCommandGroup):
             move2cart(69.5, 19, tilter, extender),
             commands2.WaitCommand(.1),
             InstantCommand(lambda: Claw.release(), [Claw]),
-            commands2.WaitCommand(.15),
+            commands2.WaitCommand(.2),
             safety,
             setHeading(-120, drive),
             commands2.WaitCommand(.5),
             setHeading(60, drive),
             gyroBalance2(drive, Lockdown),
-            InstantCommand(lambda: Lockdown.lockDown(), [Lockdown],)
         )
 

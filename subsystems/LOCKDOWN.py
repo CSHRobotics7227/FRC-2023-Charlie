@@ -9,7 +9,6 @@ class lockdown(commands2.SubsystemBase):
 
     def lockDown(self):
         self.lockDownCyl.set(wpilib.DoubleSolenoid.Value.kReverse)
-
     def lockUp(self):
         self.lockDownCyl.set(wpilib.DoubleSolenoid.Value.kForward)
 

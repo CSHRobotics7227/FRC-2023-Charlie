@@ -23,6 +23,7 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
             const.TiltDefPos
         )
         self.tiltMotor = rev.CANSparkMax(7, rev.CANSparkMax.MotorType.kBrushless)
+        self.extendMotor.setSmartCurrentLimit(30)
         self.encoder = wpilib.DutyCycleEncoder(1)
         self.disable()
         self.tiltMotor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)

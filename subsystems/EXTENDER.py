@@ -12,19 +12,19 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
     def __init__(self) -> None:
         super().__init__(
             wpimath.controller.ProfiledPIDController(
-                constants.kExtendP,
-                constants.kExtendI,
-                constants.kExtendD,
+                const.kExtendP,
+                const.kExtendI,
+                const.kExtendD,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    120,
-                    200,
+                    const.kExtendV,
+                    const.kExtendA,
                 ),
             ),
             0
         )
+        self.extendMotor.restoreFactoryDefaults()
         self.extendMotor = rev.CANSparkMax(6, rev.CANSparkMax.MotorType.kBrushless)
         self.extendMotor.setSmartCurrentLimit(30)
-        self.extendMotor.restoreFactoryDefaults()
         self.extendMotor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self.encoder = self.extendMotor.getEncoder()
 
@@ -32,8 +32,6 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
         self.disable()
 
     def _useOutput(self, output: float, setpoint: float) -> None:
-        #if math.fabs(output)>1: output=output/math.fabs(output)
-        #print('output  = ', output)
         self.extendMotor.set(output)
 
     def _getMeasurement(self) -> float:
@@ -41,16 +39,12 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
 
     def periodic(self) -> None:
         super().periodic()
-        #print('extender pos = ', self.encoder.getPosition())
-        #print('extender stepoint = ', self.getController().getSetpoint().position)
         if not self.limitSwitch.get():
             self.encoder.setPosition(0)
-            #self.extendMotor.set(0)
 
     def cart2polar(self, x: float, y: float):
         self.enable()
         r = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
-        #if 42 < r < 72: return
         extendSetpoint = (r - 37) * -2.4667
         self.setGoal(extendSetpoint)
 
