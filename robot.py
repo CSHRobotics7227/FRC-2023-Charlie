@@ -1,29 +1,22 @@
 #!/usr/bin/env python3
-import wpilib
-import commands2
-import commands2.cmd
+from wpilib import run
+from commands2 import TimedCommandRobot
 import robotcontainer
 
-from commands.extendArm import extendArm
-from commands.tiltArm import tiltArm
-class Robot(commands2.TimedCommandRobot):
+class Robot(TimedCommandRobot):
 
     def robotInit(self) -> None:
-        self.container = robotcontainer.RobotContainer()
-        #self.setpoint = 42
+        self.rob = robotcontainer.RobotContainer()
+        self.rob.lights.set(False)
+
 
     def autonomousInit(self):
-        self.container.enableAllPID()
-        self.container.robotDrive.setBrake()
-        self.container.autoCommand().schedule()
+        self.rob.autoInit()
 
     def teleopInit(self):
-        self.container.enableAllPID()
-        self.container.robotDrive.setCoast()
-        extendArm(0, self.container.extender).andThen(tiltArm(8.52, self.container.tilter)).schedule()
-
+        self.rob.teleopInit()
     def teleopPeriodic(self) -> None:
-        self.container.teleopPeriodic()
+        self.rob.teleopPeriodic()
 
     def testInit(self) -> None:
         pass
@@ -32,9 +25,10 @@ class Robot(commands2.TimedCommandRobot):
         pass
 
     def disabledInit(self):
-        self.container.disableAllPID()
-        self.container.setDefaultPos()
+        self.rob.disableAllPID()
+        self.rob.setDefaultPos()
+        self.rob.lights.set(False)
 
 
 if __name__ == "__main__":
-    wpilib.run(Robot)
+    run(Robot)

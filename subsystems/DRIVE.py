@@ -2,7 +2,7 @@ import commands2
 import ctre
 import math
 
-import constants
+import const
 
 
 class DriveSubsystem(commands2.SubsystemBase):
@@ -62,7 +62,9 @@ class DriveSubsystem(commands2.SubsystemBase):
         self.RDrive4.follow(self.RDrive2) # follow motor, so we only need to control 1
 
         self.gyro = gyro
+
         self.gyro.reset() # set angle = 0
+        self.resetEncoders()
 
     def resetEncoders(self):
         self.LDrive1.setSelectedSensorPosition(0)
@@ -73,6 +75,16 @@ class DriveSubsystem(commands2.SubsystemBase):
 
     def getHeading(self):
         return self.gyro.getAngle()
+
+    def tanHeading(self):
+        return math.tan(self.gyro.getAngle())
+
+
+    def getXaxis(self):
+        return self.gyro.getXFilteredAccelAngle()-85
+
+    def getYaxis(self):
+        return self.gyro.getYFilteredAccelAngle()
 
     def getEncoders(self):
         return (self.LDrive1.getSelectedSensorPosition()/2048 + self.RDrive2.getSelectedSensorPosition()/2048)/2
@@ -92,19 +104,24 @@ class DriveSubsystem(commands2.SubsystemBase):
         self.RDrive2.setNeutralMode(ctre.NeutralMode.Coast)
         self.RDrive4.setNeutralMode(ctre.NeutralMode.Coast)
 
-    def arcadeDrive(self, power: float, turn: float, halfspeed=False, doublespeed=False, turn_power=0.3):
+    def arcadeDrive(self, power: float, turn: float, halfspeed=False, doublespeed=False, turn_power=0.3, reverse=False):
         if math.fabs(power) < 0.0703125: power = 0 # 0.0703125 is the deadbend
         if math.fabs(turn) < 0.0703125: turn = 0
 
+        #print('power = ', power)
         motor_power = .5
         if halfspeed: motor_power*=0.5
         if doublespeed:
             motor_power*=2
             turn_power*=0.5
-        #print('heading = ', self.getHeading())
-        #print('encoders = ', self.getEncoders())
-        self.LDrive1.set(ctre.ControlMode.PercentOutput, ((power + (turn * turn_power)) * motor_power))
-        self.RDrive2.set(ctre.ControlMode.PercentOutput, ((power - (turn * turn_power)) * motor_power))
+
+        polarity = 1
+        if reverse:
+            polarity=-1
+            turn_power*=-1
+
+        self.LDrive1.set(ctre.ControlMode.PercentOutput, polarity*((power + (turn * turn_power)) * motor_power))
+        self.RDrive2.set(ctre.ControlMode.PercentOutput, polarity*((power - (turn * turn_power)) * motor_power))
 
     def goToDistance(self, distance: float):
         self.LDrive1.set(ctre.ControlMode.MotionMagic, distance)

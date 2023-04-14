@@ -3,18 +3,23 @@ import commands2
 import photonvision
 
 
-class lockdown(commands2.SubsystemBase):
+class visionSubsystem(commands2.SubsystemBase):
     def __init__(self) -> None:
         super().__init__()
-        self.camera = photonvision.PhotonCamera('USB_GS_Camera')
-        self.results = self.camera.getLatestResult()
+        self.apriltag = photonvision.PhotonCamera('USB_GS_Camera')
+        self.retro = photonvision.PhotonCamera('USB_Color_Camera')
+        self.aprilResults = self.apriltag.getLatestResult()
+        self.retroResults = self.retro.getLatestResult()
 
     def setPipeline(self, index: int) -> None:
-        self.camera.setPipelineIndex(index)
+        self.apriltag.setPipelineIndex(index)
 
-    def getResults(self) -> photonvision.PhotonTrackedTarget:
-        return self.results.getBestTarget()
+    def getRetroTargets(self) -> photonvision.PhotonTrackedTarget:
+        return self.retroResults.getBestTarget()
+    def getAprilTargets(self) -> photonvision.PhotonTrackedTarget:
+        return self.aprilResults.getBestTarget()
+
 
     def periodic(self) -> None:
-        self.results = self.camera.getLatestResult()
-
+        self.aprilResults = self.apriltag.getLatestResult()
+        self.retroResults = self.retro.getLatestResult()

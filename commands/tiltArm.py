@@ -19,8 +19,8 @@ class tiltArm(commands2.CommandBase):
 
     def initialize(self) -> None:
         super().initialize()
+        self.tilter.enable()
         self.tilter.setGoal(self.target)
-        #print('TILTING ARM')
 
     def isFinished(self) -> bool:
         #print('ARM TIlTED = ', self.tilter.getController().atSetpoint())

@@ -5,7 +5,7 @@ import commands2
 import rev
 import math
 
-import constants
+import const
 
 
 class extenderSubsystem(commands2.ProfiledPIDSubsystem):
@@ -41,8 +41,6 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
 
     def periodic(self) -> None:
         super().periodic()
-        #print('extender tolerance', self.getController().getPositionTolerance())
-
         #print('extender pos = ', self.encoder.getPosition())
         #print('extender stepoint = ', self.getController().getSetpoint().position)
         if not self.limitSwitch.get():
@@ -50,14 +48,15 @@ class extenderSubsystem(commands2.ProfiledPIDSubsystem):
             #self.extendMotor.set(0)
 
     def cart2polar(self, x: float, y: float):
+        self.enable()
         r = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
         #if 42 < r < 72: return
-        extendSetpoint = (r - 42) * -2.4667
+        extendSetpoint = (r - 37) * -2.4667
         self.setGoal(extendSetpoint)
 
     def adjustExtender(self, add: float):
+        self.enable()
         current = self.getController().getGoal().position
         setpoint = current+add
         if -setpoint<0 or -setpoint>=80: return
-        #print('adjusting extender to = ', setpoint)
         self.setGoal(setpoint)

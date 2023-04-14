@@ -18,7 +18,7 @@ class move2cart(commands2.SequentialCommandGroup):
         r = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
         if 42 < r < 72: self.cancel()
         if (-math.pi/3) < theta < (math.pi/6): self.cancel()
-        extendSetpoint = (r-42)*-2.4667
+        extendSetpoint = (r-37)*-2.4667
         tiltSetpoint = ((theta/(-math.pi*2))+0.743)*10
         #print('extender setpoint = ', extendSetpoint)
         #print('tilt setpoint = ', tiltSetpoint)

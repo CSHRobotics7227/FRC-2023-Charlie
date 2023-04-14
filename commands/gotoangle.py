@@ -1,12 +1,11 @@
-import commands2
-import wpilib
+import math
 import commands2.cmd
 import wpimath.controller
 import wpimath.trajectory
 
 from subsystems.DRIVE import DriveSubsystem
 
-import constants
+import const
 
 
 class TurnToAngle(commands2.ProfiledPIDCommand):
@@ -14,12 +13,12 @@ class TurnToAngle(commands2.ProfiledPIDCommand):
     def __init__(self, targetAngleDegrees: float, drive: DriveSubsystem) -> None:
         super().__init__(
             wpimath.controller.ProfiledPIDController(
-                constants.kTurnP,
-                constants.kTurnI,
-                constants.kTurnD,
+                const.kTurnP,
+                const.kTurnI,
+                const.kTurnD,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    150,
-                    300,
+                    const.kTurnV,
+                    const.kTurnA,
                 ),
             ),
             # Close loop on heading
@@ -28,16 +27,12 @@ class TurnToAngle(commands2.ProfiledPIDCommand):
             targetAngleDegrees,
             # Pipe output to turn robot
             lambda output, setpoint: drive.arcadeDrive(0, output),
-            # Require the drive
             [drive],
         )
         drive.zeroHeading()
-        #self.targetAngleDegrees = targetAngleDegrees
         self.getController().enableContinuousInput(-180, 180)
-        # Set the controller tolerance - the delta tolerance ensures the robot is stationary at the
-        # setpoint before it is considered as having reached the reference
-        self.getController().setTolerance(1)
         drive.setBrake()
+        self.drive = drive
 
     #def initialize(self) -> None:
     #    super().initialize()
@@ -60,4 +55,6 @@ class TurnToAngle(commands2.ProfiledPIDCommand):
     #    self.drive.setCoast()
 
     def isFinished(self) -> bool:
-        return self.getController().atGoal()
+        #print('velocy error = ', self.getController().getVelocityError())
+        #print('pos error = ', self.getController().getPositionError())
+        return math.fabs(self.getController().getGoal().position)-math.fabs(self.drive.getHeading())<=1 and math.fabs(self.getController().getVelocityError())<12

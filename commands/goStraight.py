@@ -6,42 +6,47 @@ import wpimath.trajectory
 
 from subsystems.DRIVE import DriveSubsystem
 
-import constants
+import const
 
 
-class goHeading(commands2.ProfiledPIDCommand):
+class goStriaght(commands2.ProfiledPIDCommand):
     def __init__(self, inches: float, drive: DriveSubsystem) -> None:
         revolutions = -(inches/18.85)*8.85
-        print('revolutions = ', revolutions)
         super().__init__(
             wpimath.controller.ProfiledPIDController(
                 constants.kDriveP,
                 constants.kDriveI,
                 constants.kDriveD,
                 wpimath.trajectory.TrapezoidProfile.Constraints(
-                    20,
-                    40,
+                    15,
+                    30,
                 ),
             ),
-            # Close loop on heading
             drive.getEncoders,
-            # Set reference to target
             revolutions,
-            # Pipe output to turn robot
-            lambda output, setpoint: drive.arcadeDrive(output, 0),
-            # Require the drive
+            lambda output, setpoint: None, #drive.arcadeDrive(output, 0),
             [drive],
         )
-        #self.getController().setTolerance()
-        drive.resetEncoders()
+        #drive.resetEncoders()
         drive.setBrake()
         self.drive = drive
+        #self.controller = wpimath.controller.PIDController(.24,0,0)
+
+    #def initialize(self) -> None:
+    #    super().initialize()
+    #    self.drive.resetEncoders()
+    #    print('encoders = ', self.drive.getEncoders())
 
 
     def execute(self) -> None:
         super().execute()
-        print('goal = ', math.fabs(self.getController().getGoal().position))
-        print('encoders = ', math.fabs(self.drive.getEncoders()))
+        print('going forward')
+        #self.getController().calculate()
+
+
+    #def end(self, interrupted: bool) -> None:
+    #    super().end(interrupted)
+    #    print('encoders at end = ', self.drive.getEncoders())
 
     def isFinished(self) -> bool:
         return math.fabs(self.getController().getGoal().position)-math.fabs(self.drive.getEncoders()) <= 0.3
