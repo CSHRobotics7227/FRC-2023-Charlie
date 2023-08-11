@@ -1,3 +1,4 @@
+# This is just to use setGoal() as a command
 import math
 
 import commands2.cmd
@@ -5,7 +6,6 @@ from commands2 import Command
 
 
 from subsystems.EXTENDER import extenderSubsystem
-
 
 class extendArm(commands2.CommandBase):
 

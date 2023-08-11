@@ -4,7 +4,7 @@ import commands2
 
 class lockdown(commands2.SubsystemBase):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__()                      # 8 is can ID
         self.lockDownCyl = wpilib.DoubleSolenoid(8, wpilib.PneumaticsModuleType.REVPH, 6, 7)
 
     def lockDown(self):

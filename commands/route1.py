@@ -30,9 +30,9 @@ class route1(commands2.SequentialCommandGroup):
             InstantCommand(lambda: Claw.release(), [Claw]),
             commands2.WaitCommand(.2),
             safety,
-            setHeading(-120, drive),
+            setHeading(-127, drive),
             commands2.WaitCommand(.5),
-            setHeading(60, drive),
+            setHeading(62, drive),
             gyroBalance2(drive, Lockdown),
         )
 

@@ -35,11 +35,11 @@ kbalanceD = 0
 
 
 ### DRIVETRAIN ###
-maxSpeed = 0.6 # maximum speed for falcons, so setting falcons to 50% would be 50%*60%
+maxSpeed = 0.3 # maximum speed for falcons, so setting falcons to 50% would be 50%*60%
 powerDeadband = 0.0703125
 turnDeadband = 0.0703125
 
 ### ETC ###
 balanceSpeed = 0.2
-headingSpeed = 0.4
+headingSpeed = 0.5
 headingK = -0.0714173

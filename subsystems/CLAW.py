@@ -4,7 +4,7 @@ import commands2
 
 class claw(commands2.SubsystemBase):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__()                 # (can ID, Type, port1, port2)
         self.clawCyl = wpilib.DoubleSolenoid(8, wpilib.PneumaticsModuleType.REVPH, 5, 4)
         self.grip()
 

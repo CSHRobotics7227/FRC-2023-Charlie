@@ -23,7 +23,7 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
             const.TiltDefPos
         )
         self.tiltMotor = rev.CANSparkMax(7, rev.CANSparkMax.MotorType.kBrushless)
-        self.extendMotor.setSmartCurrentLimit(30)
+        self.tiltMotor.setSmartCurrentLimit(30)
         self.encoder = wpilib.DutyCycleEncoder(1)
         self.disable()
         self.tiltMotor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
@@ -43,14 +43,14 @@ class tiltSubsystem(commands2.ProfiledPIDSubsystem):
             self.disable()
             self.tiltMotor.set(0)
 
-    def cart2polar(self, x: float, y: float) -> None:
+    def cart2polar(self, x: float, y: float) -> None: # use for micro adjust
         self.enable()
         theta = math.atan(y / x)
         setpoint = ((theta / (-math.pi * 2)) + 0.743) * 10
         if setpoint>=9 or setpoint<=6.45: return
         self.setGoal(setpoint)
 
-    def adjustTilt(self, add: float):
+    def adjustTilt(self, add: float): # adjusts when called in loop
         self.enable()
         current = self.getController().getGoal().position
         setpoint = current+add

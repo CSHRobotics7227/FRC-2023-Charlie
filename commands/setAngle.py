@@ -32,6 +32,7 @@ class setAngle(commands2.ProfiledPIDCommand):
         drive.zeroHeading()
         self.getController().enableContinuousInput(-180, 180)
         drive.setBrake()
+        self.drive = drive
 
 
     def isFinished(self) -> bool:

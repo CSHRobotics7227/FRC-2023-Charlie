@@ -1,3 +1,4 @@
+# This is just to use setGoal() as a command
 import math
 
 import commands2.cmd
@@ -20,6 +21,7 @@ class tiltArm(commands2.CommandBase):
         super().initialize()
         self.tilter.enable()
         self.tilter.setGoal(self.target)
+
 
     def isFinished(self) -> bool:
         return math.fabs(self.tilter.getController().getSetpoint().position-self.target) <= 0.1

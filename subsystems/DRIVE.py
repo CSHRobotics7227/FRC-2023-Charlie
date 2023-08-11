@@ -7,7 +7,7 @@ import const
 
 class DriveSubsystem(commands2.SubsystemBase):
     def __init__(self, gyro) -> None:
-        super().__init__()
+        super().__init__() # be sure to call super methods in all overrided methods. **especially periodic**. This allows subsystem base to function correctly
         self.LDrive1 = ctre.TalonFX(1)
         self.RDrive2 = ctre.TalonFX(2)
         self.LDrive3 = ctre.TalonFX(3)
@@ -44,39 +44,42 @@ class DriveSubsystem(commands2.SubsystemBase):
 
         self.gyro.reset() # set angle = 0
 
+                 # (forward power    , turn power  ,half speed button, doublespeed     , turn adjust   , polarity )
     def arcadeDrive(self, power: float, turn: float, halfspeed=False, doublespeed=False, turn_power=0.3, reverse=False):
         if math.fabs(power) < const.powerDeadband: power = 0 # 0.0703125 is the deadbend
         if math.fabs(turn) < const.turnDeadband: turn = 0
 
-        #power-=const.powerDeadband
-        #turn-=const.turnDeadband
+        totalPower = .5
+        if halfspeed: totalPower*=0.5
 
-        motor_power = .5
-        if halfspeed: motor_power*=0.5
         if doublespeed:
-            motor_power*=2
-            turn_power*=0.5
+            totalPower*=2
+            turn_power*=0.5 # doublespeed shouldn't affect turn power.
 
         polarity = 1
         if reverse:
             polarity=-1
             turn_power*=-1
 
-        self.LDrive1.set(ctre.ControlMode.PercentOutput,
-                         polarity*((power + (turn * turn_power)) * motor_power))
+        # basic arcade drive formula is: {forward +/- turn} [+ or - depends on side]
+        # add in turn power: {forward +/- (turn * turn_power)}
+        # add in total power: {(forward +/- (turn * turn_power))*totalPower}
+        # polarity will then reverse the direction, and turn_power is negated above, leading to reverse polarity
+        self.LDrive1.set(ctre.ControlMode.PercentOutput, # PercentOutput is from -1 to 1. This is percent * max speed [configured above]
+                         polarity*((power + (turn * turn_power)) * totalPower))
         self.RDrive2.set(ctre.ControlMode.PercentOutput,
-                         polarity*((power - (turn * turn_power)) * motor_power))
+                         polarity*((power - (turn * turn_power)) * totalPower))
 
     def resetEncoders(self):
-        self.LDrive1.setSelectedSensorPosition(0)
-        self.RDrive2.setSelectedSensorPosition(0)
+        self.LDrive1.setSelectedSensorPosition(0) # zeros encoders
+        self.RDrive2.setSelectedSensorPosition(0) # zeros encoders
     def zeroHeading(self):
-        self.gyro.reset()
+        self.gyro.reset() # zeros gyro
     def getHeading(self):
         return self.gyro.getAngle()
-    def tanHeading(self):
-        return math.tan(self.gyro.getAngle())
-    def getAvgDistance(self):
+    def getYcomp(self): # angle for charge station balance
+        return self.gyro.getYComplementaryAngle()-87 # -87, so default angle is 0 degrees.
+    def getAvgDistance(self): # getSelectedSensorPosition() returns how many encoder ticks have passed, each round has 2048, so this returns average number of rotations for both sides
         return (self.LDrive1.getSelectedSensorPosition()/2048 + self.RDrive2.getSelectedSensorPosition()/2048)/2
     def setBrake(self):
         self.LDrive1.setNeutralMode(ctre.NeutralMode.Brake)
